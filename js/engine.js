@@ -318,7 +318,7 @@ Card2 = (function(superClass) {
 
   Card2.CATEGORY = "公共";
 
-  Card2.DESCRIPTION = "カードを1枚引く";
+  Card2.DESCRIPTION = "カードを1枚引く\n何度でも使える";
 
   Card2.use = function() {
     Game.pullDeck();
@@ -874,6 +874,9 @@ Card18 = (function(superClass) {
     buildCardNum = HandSpace.getCardNum(buildCardIndex);
     cardClass = HandSpace.getCardClass(buildCardIndex);
     cost = cardClass.getCost();
+    if (!cardClass.isBuildable()) {
+      return "消費財は建設できません";
+    }
     if (cost - 1 !== rightIndexs.length) {
       return "捨札が建設コストと一致していません";
     }
@@ -1187,6 +1190,9 @@ Card29 = (function(superClass) {
     buildCardNum = HandSpace.getCardNum(buildCardIndex);
     cardClass = HandSpace.getCardClass(buildCardIndex);
     cost = cardClass.getCost();
+    if (!cardClass.isBuildable()) {
+      return "消費財は建設できません";
+    }
     if (cost !== rightIndexs.length) {
       return "捨札が建設コストと一致していません";
     }
@@ -1346,6 +1352,9 @@ Card34 = (function(superClass) {
     buildCardNum1 = HandSpace.getCardNum(buildCardIndex1);
     cardClass1 = HandSpace.getCardClass(buildCardIndex1);
     cost1 = cardClass1.getCost();
+    if (!(cardClass0.isBuildable() && cardClass1.isBuildable())) {
+      return "消費財は建設できません";
+    }
     if (cost0 !== cost1) {
       return "建物カードのコストが一致していません";
     }
@@ -2153,6 +2162,8 @@ LogSpace = (function(superClass) {
 
   LogSpace.DIV_FATAL_CLASS = 'log_fatal';
 
+  LogSpace.DIV_SCRIPT_ERROR_CLASS = 'log_script_error';
+
   LogSpace.init = function() {
     LogSpace.__super__.constructor.init.call(this);
     return this.removeAll();
@@ -2211,6 +2222,13 @@ LogSpace = (function(superClass) {
     this.getElement().append(e);
     e.fadeOut(sec * 1000);
     return setTimeout(e.remove, sec * 1000);
+  };
+
+  LogSpace.addScriptError = function(message, url, lineNo) {
+    var e, txt;
+    txt = ("スクリプトエラーが発生しました。\n申し訳ありませんが、<a href=\"https://twitter.com/rev84\" target=\"_blank\">@rev84</a>まで、以下のメッセージや、スクリーンショットを送っていただけると助かります。\n<hr>\n[message]\n" + message + "\n[url]\n" + url + "\n[lineNo]\n" + lineNo).replace(/\n/g, '<br>');
+    e = $('<div>').addClass(this.DIV_SCRIPT_ERROR_CLASS).html(txt);
+    return this.getElement().append(e);
   };
 
   return LogSpace;
@@ -2961,3 +2979,8 @@ $(function() {
   });
   return Game.gameStart();
 });
+
+window.onerror = function(message, url, lineNo) {
+  LogSpace.addScriptError(message, url, lineNo);
+  return true;
+};
